@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
+import { registerfunction } from "../services/Apis";
+import { useNavigate } from "react-router-dom";
 import "../styles/mix.css";
 
 const Register = () => {
@@ -8,8 +10,10 @@ const Register = () => {
   const [inputdata, setInputdata] = useState({
     fname: "",
     email: "",
-    password: ""
+    password: "",
   });
+
+  const navigate = useNavigate();
 
   console.log(inputdata);
 
@@ -21,29 +25,31 @@ const Register = () => {
   };
 
   //register data
-  const handleSubmit = (e)=>{
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const{fname,email,password} = inputdata;
+    const { fname, email, password } = inputdata;
 
-    if(fname === ""){
-      toast.error("Enter Your Name")
+    if (fname === "") {
+      toast.error("Enter Your Name");
+    } else if (email === "") {
+      toast.error("Enter Your Email");
+    } else if (!email.includes("@")) {
+      toast.error("Enter Valid Email");
+    } else if (password === "") {
+      toast.error("Enter Your Password");
+    } else if (password.length < 6) {
+      toast.error("password length minimum 6 character");
+    } else {
+      const response = await registerfunction(inputdata);
+
+      if (response.status === 200) {
+        setInputdata({...inputdata,fname:"",email:"",password:""});
+        navigate("/");
+      } else {
+        toast.error(response.response.data.error);
+      }
     }
-    else if(email===""){
-      toast.error("Enter Your Email")
-    }
-    else if(!email.includes("@")){
-      toast.error("Enter Valid Email")
-    }
-    else if(password===""){
-      toast.error("Enter Your Password")
-    }
-    else if(password.length<6){
-      toast.error("password length minimum 6 character")
-    }
-    else{
-      toast.success("user register")
-    }
-  }
+  };
 
   return (
     <>
@@ -95,7 +101,9 @@ const Register = () => {
               </div>
             </div>
 
-            <button className="btn" onClick={handleSubmit}>Sign Up</button>
+            <button className="btn" onClick={handleSubmit}>
+              Sign Up
+            </button>
             <p>Don't have an account</p>
           </form>
         </div>
