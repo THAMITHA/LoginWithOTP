@@ -1,9 +1,22 @@
-import React from 'react'
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
-  return (
-    <div>Dashboard</div>
-  )
-}
+  const navigate = useNavigate();
 
-export default Dashboard
+  const userValid = () => {
+    let token = localStorage.getItem("userdbtoken");
+    if (token) {
+      console.log("user valid");
+    } else {
+      navigate("*");
+    }
+  };
+
+  useEffect(() => {
+    userValid();
+  }, []);
+  return <div>Dashboard</div>;
+};
+
+export default Dashboard;
