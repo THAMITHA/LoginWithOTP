@@ -16,6 +16,22 @@ const userOtpSchema = new mongoose.Schema({
     type: String,
     require: true,
   },
+  used: {
+    type: Boolean,
+    default: false,
+  },
+  attempts: {
+    type: Number,
+    default: 0,
+  },
+  blockedUntil: {
+    type: Date,
+    default: null,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 //user otp model
