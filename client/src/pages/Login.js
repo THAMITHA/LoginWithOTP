@@ -2,13 +2,12 @@ import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { sentOtpFunction } from "../services/Apis";
-import Spinner from 'react-bootstrap/Spinner';
+import Spinner from "react-bootstrap/Spinner";
 import "../styles/mix.css";
-
 
 const Login = () => {
   const [email, setEmail] = useState("");
-  const [spiner,setSpiner] = useState(false);
+  const [spiner, setSpiner] = useState(false);
 
   const navigate = useNavigate();
 
@@ -20,7 +19,7 @@ const Login = () => {
     } else if (!email.includes("@")) {
       toast.error("Enter Valid Email !");
     } else {
-      setSpiner(true)
+      setSpiner(true);
       const data = {
         email: email,
       };
@@ -28,8 +27,8 @@ const Login = () => {
       const response = await sentOtpFunction(data);
 
       if (response.status === 200) {
-        setSpiner(false)
-        navigate("/user/otp",{state:email});
+        setSpiner(false);
+        navigate("/user/otp", { state: email });
       } else {
         toast.error(response.response.data.error);
       }
@@ -55,11 +54,15 @@ const Login = () => {
                 placeholder="Enter Your Email Address"
               ></input>
             </div>
-            <button className="btn" onClick={sendOtp}>Login
-            {
-              spiner ? 
-              <span><Spinner animation="border" /></span>:""
-            }
+            <button className="btn" onClick={sendOtp}>
+              Login
+              {spiner ? (
+                <span>
+                  <Spinner animation="border" />
+                </span>
+              ) : (
+                ""
+              )}
             </button>
             <p>
               Don't have an account <NavLink to="/register">Sign up</NavLink>
