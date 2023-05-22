@@ -1,7 +1,7 @@
 const users = require("../models/userSchema");
 const userotp = require("../models/userOtp");
 const nodemailer = require("nodemailer");
-const moment = require('moment');
+const moment = require("moment");
 
 //email config
 const transporter = nodemailer.createTransport({
@@ -49,8 +49,6 @@ exports.userOtpSend = async (req, res) => {
     res.status(400).json({ error: "Please Enter Your Email" });
   }
 
-
-  
   try {
     const presuer = await users.findOne({ email: email });
 
@@ -58,11 +56,16 @@ exports.userOtpSend = async (req, res) => {
       // Check if there is an existing OTP request within the last minute
       const lastOtpRequest = await userotp.findOne({
         email: email,
-        createdAt: { $gte: moment().subtract(1, 'minutes') }
+        createdAt: { $gte: moment().subtract(1, "minutes") },
       });
 
       if (lastOtpRequest) {
-        res.status(400).json({ error: "Please wait for at least 1 minute before generating a new OTP" });
+        res
+          .status(400)
+          .json({
+            error:
+              "Please wait for at least 1 minute before generating a new OTP",
+          });
       } else {
         const OTP = Math.floor(100000 + Math.random() * 900000);
 
@@ -135,20 +138,24 @@ exports.userLogin = async (req, res) => {
 
   try {
     const userOtpSchema = await userotp.findOne({ email: email });
-    
+
     if (userOtpSchema) {
       if (userOtpSchema.otp === otp) {
         // Check if the OTP is still valid (within 5 minutes)
         const currentTime = moment();
         const otpGenerationTime = moment(userOtpSchema.createdAt);
 
-        if (currentTime.diff(otpGenerationTime, "minutes") > 5000) {
-          return res.status(400).json({ error: "OTP has expired. Please generate a new one." });
-        }
-        else if(userOtpSchema.used || (!userOtpSchema.used && ( userOtpSchema.attempts==0))) {
+        if (currentTime.diff(otpGenerationTime, "minutes") > 5) {
+          return res
+            .status(400)
+            .json({ error: "OTP has expired. Please generate a new one." });
+        } else if (
+          userOtpSchema.used ||
+          (!userOtpSchema.used && userOtpSchema.attempts == 0)
+        ) {
           userOtpSchema.used = true;
           await userOtpSchema.save();
-          
+
           const preuser = await users.findOne({ email: email });
 
           // Token generation
@@ -156,12 +163,13 @@ exports.userLogin = async (req, res) => {
           return res
             .status(200)
             .json({ message: "User login successful", userToken: token });
-        }
-        else{
+        } else {
           return res
             .status(400)
-            .json({ error: "OTP has already been used. Please generate a new one." });
-        } 
+            .json({
+              error: "OTP has already been used. Please generate a new one.",
+            });
+        }
       } else {
         // Increment the OTP verification attempts
         userOtpSchema.attempts += 1;
@@ -169,8 +177,7 @@ exports.userLogin = async (req, res) => {
         // Check if the user has reached the maximum consecutive wrong attempts
         if (userOtpSchema.attempts >= 5) {
           userOtpSchema.blockedUntil = moment().add(1, "hour");
-          userOtpSchema.attempts=0;
-
+          userOtpSchema.attempts = 0;
         }
 
         await userOtpSchema.save();
@@ -178,11 +185,11 @@ exports.userLogin = async (req, res) => {
         return res.status(400).json({ error: "Invalid OTP" });
       }
     } else {
-      return res.status(400).json({ error: "This user does not exist in our database" });
+      return res
+        .status(400)
+        .json({ error: "This user does not exist in our database" });
     }
   } catch (error) {
     return res.status(400).json({ error: "Invalid details", error });
   }
 };
-
-
